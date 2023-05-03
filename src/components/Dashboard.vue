@@ -19,13 +19,17 @@
           </ul>
           <div class="card-status">
             <label for="">Status:</label>
-            <select @change="updateBurger($event, burger.id)" v-bind:class="bgStatus = burger.status">
+            <select
+              @change="updateBurger($event, burger.id)"
+              v-bind:class="(bgStatus = burger.status)"
+            >
               <option
                 v-for="s in status"
                 :key="s.id"
                 :value="s.tipo"
                 :selected="burger.status == s.tipo"
-                v-bind:class="bgStatus = s.tipo">
+                v-bind:class="(bgStatus = s.tipo)"
+              >
                 {{ s.tipo }}
               </option>
             </select>
@@ -38,6 +42,7 @@
 
 <script>
 import Message from "./Message.vue";
+import axios from "axios";
 
 export default {
   name: "Dashboard",
@@ -53,54 +58,65 @@ export default {
     Message,
   },
   methods: {
-    async getPedidos() {
-      const req = await fetch("https://json-server-make-your-burger.vercel.app/burgers");
-
-      const data = await req.json();
-
-      this.burgers = data;
+    getPedidos() {
+      axios
+        .get("https://json-server-make-your-burger.vercel.app/burgers")
+        .then((response) => {
+          this.burgers = response.data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
 
       // Resgatar os status
       this.getStatus();
     },
-    async getStatus() {
-      const req = await fetch("https://json-server-make-your-burger.vercel.app/status");
-
-      const data = await req.json();
-
-      this.status = data;
+    getStatus() {
+      axios
+        .get("https://json-server-make-your-burger.vercel.app/status")
+        .then((response) => {
+          this.status = response.data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
-    async deleteBurger(id) {
-      const req = await fetch(`https://json-server-make-your-burger.vercel.app/burgers/:${id}`, {
-        method: "DELETE",
-      });
 
-      const res = await req.json();
+    deleteBurger(id) {
+      axios
+        .delete(`https://json-server-make-your-burger.vercel.app/burgers/${id}`)
+        .then((response) => {
+          //msg
+          this.msg = `Order removed`;
+          setTimeout(() => (this.msg = ""), 3000);
 
-      //msg
-      this.msg = `Order removed`;
-      setTimeout(() => (this.msg = ""), 3000);
-
-      this.getPedidos();
+          this.getPedidos();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
-    async updateBurger(event, id) {
+
+    updateBurger(event, id) {
       const option = event.target.value;
 
-      const dataJson = JSON.stringify({ status: option });
+      axios({
+        method: "patch",
+        url: `https://json-server-make-your-burger.vercel.app/burgers/${id}`,
+        data: {
+          status: option,
+        },
+      })
+        .then((response) => {
+          //msg
+          this.msg = `The order Nº ${id} has been updated to ${option}`;
+          setTimeout(() => (this.msg = ""), 3000);
 
-      const req = await fetch(`https://json-server-make-your-burger.vercel.app/burgers/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: dataJson,
-      });
-
-      const res = await req.json();
-
-      //msg
-      this.msg = `The order Nº ${res.id} has been updated to ${res.status}`;
-      // setTimeout(() => (this.msg = ""), 3000);
-
-      this.getPedidos();
+          this.getPedidos();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
   mounted() {
@@ -249,17 +265,18 @@ span {
   }
 }
 
-.production{
+.production {
   background-color: #ffff0060;
 }
-.requested{
+.requested {
   background-color: #00d9ff67;
 }
-.finalized{
+.finalized {
   background-color: #ff000047;
 }
 
-select, option{
+select,
+option {
   text-transform: capitalize;
 }
 </style>

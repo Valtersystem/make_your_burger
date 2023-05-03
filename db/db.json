@@ -77,17 +77,5 @@
       "tipo": "finalized"
     }
   ],
-  "burgers": [
-    {
-      "name": "Valter",
-      "meat": "Topside",
-      "bread": "Italian bread",
-      "options": [
-        "Salame",
-        "Cheddar"
-      ],
-      "status": "finalized",
-      "id": 1
-    }
-  ]
+  "burgers": []
 }

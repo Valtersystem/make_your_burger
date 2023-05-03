@@ -59,6 +59,7 @@
 
 <script>
 import Message from "./Message.vue";
+import axios from "axios";
 export default {
   name: "BurgerForm",
   data() {
@@ -76,13 +77,17 @@ export default {
     };
   },
   methods: {
-    async getIngredients() {
-      const req = await fetch("https://json-server-make-your-burger.vercel.app/ingredientes");
-      const data = await req.json();
-
-      this.breads = data.breads;
-      this.meats = data.meats;
-      this.dataoptions = data.opcionais;
+    getIngredients() {
+      axios
+        .get("https://json-server-make-your-burger.vercel.app/ingredientes")
+        .then((response) => {
+          this.breads = response.data.breads;
+          this.meats = response.data.meats;
+          this.dataoptions = response.data.opcionais;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     validation(e) {
       e.preventDefault();
@@ -93,7 +98,7 @@ export default {
         this.createBurger();
       }
     },
-    async createBurger() {
+    createBurger() {
       const data = {
         name: this.name,
         meat: this.meat,
@@ -102,27 +107,22 @@ export default {
         status: "requested",
       };
 
-      const dataJson = JSON.stringify(data);
-      const req = await fetch("https://json-server-make-your-burger.vercel.app/burgers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: dataJson,
-      });
+      axios
+        .post("https://json-server-make-your-burger.vercel.app/burgers", data)
+        .then((response) => {
+          this.msg = `Order Nº ${response.data.id} placed successfully`;
+          this.color = "blue";
+          setTimeout(() => (this.msg = ""), 3000);
 
-      const res = await req.json();
-
-      // Colocar uma mensagem de sistema
-      this.msg = `Order Nº ${res.id} placed successfully`;
-      this.color = "blue";
-
-      //Limpar mensagem de sistema
-      setTimeout(() => (this.msg = ""), 3000);
-
-      // Limpor os campos
-      this.name = "";
-      this.meat = "";
-      this.bread = "";
-      this.options = [];
+          // Limpor os campos
+          this.name = "";
+          this.meat = "";
+          this.bread = "";
+          this.options = [];
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
 
@@ -131,7 +131,6 @@ export default {
   },
   mounted() {
     this.getIngredients();
-   
   },
 };
 </script>
