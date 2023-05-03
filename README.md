@@ -21,3 +21,6 @@ npm run build
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### View
+https://make-your-burger-snowy.vercel.app/
